@@ -1,4 +1,4 @@
-# NetQUIZ v0.6
+# NetQUIZ v0.6.x - Gui/Cli
 
 This is a terminal-based quiz project created by **Luca Visconti**, designed to support studying the university course **Tecnologie e Servizi di Rete** at PoliTO.
 
@@ -7,7 +7,11 @@ Hundreds of questions with answers are stored in the `quiz.json` file.
 You can **edit, add, or remove** questions directly in that file.
 
 ## 🖥️ Usage  
-The quiz runs **only via terminal**.  
+The quiz runs **only via terminal** (for now).  
+
+**CURRENTLY WORKING ON MAKING THE CODE MODULAR**
+- That means that some of the features from the precedent version might not work yet
+
 Features include:  
 - Start a **random quiz** session  
   - Questions are selected to **cover multiple categories**, depending on the quiz length  
@@ -24,7 +28,7 @@ Features include:
 
 ## 🚧 Future Developments  
 Planned features:  
-- Graphical user interface (coming soon) 
+- Graphical user interface (currentlty implementing) 
 - Explanation for answers  
 
 ## 🤝 Contribute  
