@@ -1,3 +1,4 @@
+import json
 import random
 from src.quiz import Quiz
 from src.quizClass.dataManager import DataManager
@@ -20,7 +21,7 @@ class QuizCli:
                     break
                 except:
                     print("❌ Insert a integer value.")
-                    
+
             while True:
                 inp = input("Exame mode? (if yes you wont be able to see the incorrect answers untill the end)\n[Y]/N: ").strip().lower()
                 if inp == "" or inp == "y":
@@ -128,40 +129,32 @@ class QuizCli:
             else:
                 print("❌ Please only type Y or N")
                 continue
-    
-    def addQuestion(self):
+
+    def recoveryQuiz(self):
         dataManager = DataManager()
         quizData = dataManager.load("quiz")
-        newId = max((q.get("id", 0) for q in quizData), default=0) + 1
-        domanda = input("Inserisci la domanda: ")
-        categoria = input("Inserisci la categoria: ")
-        risposte = []
-        while True:
-            r = input("Inserisci una possibile risposta (invio per terminare): ")
-            if r == "":
-                break
-            risposte.append(r)
-        while True:
-            try:
-                corretta = int(
-                    input(f"Indice della risposta corretta (0 - {len(risposte)-1}): "))
-                if 0 <= corretta < len(risposte):
-                    break
-            except:
-                pass
-            print("Invalid index.")
-        quizData.append({
-            "id": newId,
-            "domanda": domanda,
-            "risposte": risposte,
-            "corretta": corretta,
-            "categoria": categoria
-        })
+        resultsData = dataManager.loadTxtOutput("results")
+        lastLine = resultsData[-1]
+
+        wrongIds = []
+
         try:
-            dataManager.overwriteInput("quiz", quizData)
-            print("✅ Question added with ID", newId)
-        except Exception as ex:
-            print(f"❌ Sorry, somthing went wrong\n:C\n{ex}")
+            data = json.loads(lastLine)
+            wrong = data.get("sbagliate", [])
+            skipped = data.get("skippate", [])
+            wrongIds = list(set(wrong + skipped))  # merge and remove duplicates
+        except json.JSONDecodeError:
+            print("❌ File loaded but format is unexpected\n:C")
+        
+        if not wrongIds:
+            print("✅ No topics to recover, keep practicing!")
+            return
+        recovery = [q for q in quizData if q["id"] in wrongIds]
+        if not recovery:
+            print("⚠️ No questions found for recovery.")
+            return
+        
+        self.runQuiz(recovery)
 
     def quizByCategory(self):
         dataManager = DataManager()
@@ -200,6 +193,40 @@ class QuizCli:
         except ValueError:
             print("❌ Enter a valid number.")
 
+    def addQuestion(self):
+        dataManager = DataManager()
+        quizData = dataManager.load("quiz")
+        newId = max((q.get("id", 0) for q in quizData), default=0) + 1
+        domanda = input("Inserisci la domanda: ")
+        categoria = input("Inserisci la categoria: ")
+        risposte = []
+        while True:
+            r = input("Inserisci una possibile risposta (invio per terminare): ")
+            if r == "":
+                break
+            risposte.append(r)
+        while True:
+            try:
+                corretta = int(
+                    input(f"Indice della risposta corretta (0 - {len(risposte)-1}): "))
+                if 0 <= corretta < len(risposte):
+                    break
+            except:
+                pass
+            print("Invalid index.")
+        quizData.append({
+            "id": newId,
+            "domanda": domanda,
+            "risposte": risposte,
+            "corretta": corretta,
+            "categoria": categoria
+        })
+        try:
+            dataManager.overwriteInput("quiz", quizData)
+            print("✅ Question added with ID", newId)
+        except Exception as ex:
+            print(f"❌ Sorry, somthing went wrong\n:C\n{ex}")
+
 
     def menu(self):
         while True:
@@ -217,8 +244,7 @@ class QuizCli:
             elif choice == "2":
                 self.addQuestion()
             elif choice == "3":
-                print("Work In Progress")
-                # recovery_quiz()
+                self.recoveryQuiz()
             elif choice == "4":
                 self.quizByCategory()
             elif choice == "5":

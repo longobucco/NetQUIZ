@@ -18,7 +18,7 @@ class DataManager(object):
         for filename in self.OUTPUT_FILES.values():
             if not os.path.exists(filename):
                 with open(filename, "w") as f:
-                    json.dump({}, f)
+                    f.write("")
 
     # Generic loading function
     def load(self, _resource):
@@ -28,6 +28,18 @@ class DataManager(object):
             return []
         with open(self.INPUT_FILES.get(_resource), 'r', encoding='utf-8') as f:
             return json.load(f)
+    
+    # Usefull for load resultst
+    def loadTxtOutput(self, _resource):
+        if _resource not in self.OUTPUT_FILES.keys():
+            raise Exception("Requested to load a file that do not exists")
+        if not os.path.exists(self.OUTPUT_FILES.get(_resource)):
+            return []
+        with open(self.OUTPUT_FILES.get(_resource), 'r', encoding='utf-8') as f:
+            lines = [line.strip() for line in f if line.strip()]
+        if not lines:
+            return []
+        return lines
 
     def saveJson(self, _resource, _content):
         if _resource not in self.OUTPUT_FILES.keys():
@@ -49,9 +61,9 @@ class DataManager(object):
             json.dump(data, f, indent=4, ensure_ascii=False)
     
     def saveTxt(self, _resource, _content):
-         if _resource not in self.OUTPUT_FILES.keys():
+        if _resource not in self.OUTPUT_FILES.keys():
             raise Exception("Requested to load a file that do not exists")
-         with open(self.OUTPUT_FILES.get(_resource), 'a', encoding='utf-8') as f:
+        with open(self.OUTPUT_FILES.get(_resource), 'a', encoding='utf-8') as f:
             f.write(json.dumps(_content, ensure_ascii=False) + "\n")
 
     def overwriteInput(self, _resource, _content):
