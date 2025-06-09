@@ -5,9 +5,6 @@ results.txt
 progress.json
 stats.json
 
-# Progess
-progress.json
-
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
