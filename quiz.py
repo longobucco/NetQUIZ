@@ -105,6 +105,8 @@ def save_progress(start_time, quiz, score, wrong, skipped):
         with open(PROGRESS_FILE, 'r', encoding='utf-8') as f:
             try:
                 data = json.load(f)
+                if not isinstance(data, list):  # Ensure data is a list, added becouse if json file is empty "{}" it will generate a dictionary
+                    data = []
             except json.JSONDecodeError:
                 data = []
     else:
