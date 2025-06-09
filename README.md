@@ -35,4 +35,6 @@ Planned features:
 If you have ideas or want to improve the project, **feel free to open a PR**.  
 Accepted contributions will be **credited here in the README** :)
 
-Thanks to [Luca Ostinelli](https://github.com/lucaosti)
+Thanks to:
+[Luca Ostinelli](https://github.com/lucaosti)
+[Alessio Meini](https://github.com/Tartayoshi)
