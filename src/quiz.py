@@ -23,7 +23,7 @@ class Quiz(object):
         self.wrong = []
         self.skipped = []
 
-    def prepare(self, _number ,_category = "none"):
+    def prepare(self, _number, _customQuestions = None):
         dataManager = DataManager()
 
         _jsonQuiz = dataManager.load("quiz")
@@ -35,7 +35,7 @@ class Quiz(object):
 
         _number = min(_number, util.MAX_QUIZ_LENGHT, len(_jsonQuiz))
 
-        if _category == "none": # normal load
+        if not _customQuestions: # normal load
 
             categories = list(set(jsonQuestion["categoria"] for jsonQuestion in _jsonQuiz))
             minCategories = min(_number // 2, len(categories), 15)
@@ -73,6 +73,18 @@ class Quiz(object):
                         randJsonQ["corretta"],
                         randJsonQ["categoria"]
                     ))
+        else:
+            # load custom
+            for randJsonQ in _customQuestions:
+                    self.questions.append(Question(
+                        randJsonQ["id"], 
+                        randJsonQ["domanda"],
+                        randJsonQ["risposte"],
+                        randJsonQ["corretta"],
+                        randJsonQ["categoria"]
+                    ))
+
+
         return True
     
     def start(self):

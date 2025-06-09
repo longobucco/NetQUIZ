@@ -54,11 +54,11 @@ class DataManager(object):
          with open(self.OUTPUT_FILES.get(_resource), 'a', encoding='utf-8') as f:
             f.write(json.dumps(_content, ensure_ascii=False) + "\n")
 
-    #def save(self, resource):
-
-
-
-
+    def overwriteInput(self, _resource, _content):
+        if _resource not in self.INPUT_FILES.keys():
+            raise Exception("Requested to load a file that do not exists")
+        with open(self.INPUT_FILES.get(_resource), 'w', encoding='utf-8') as f:
+            json.dump(_content, f, indent=4, ensure_ascii=False)
 
     # Load topics from file
     def load_topics(self):
