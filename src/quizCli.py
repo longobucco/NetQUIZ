@@ -23,11 +23,11 @@ class QuizCli:
                     print("❌ Insert a integer value.")
 
             while True:
-                inp = input("Exame mode? (if yes you wont be able to see the incorrect answers untill the end)\n[Y]/N: ").strip().lower()
-                if inp == "" or inp == "y":
+                inp = input("Exame mode? (if yes you wont be able to see the incorrect answers untill the end)\nY/[N]: ").strip().lower()
+                if inp == "y":
                     simulator = True
                     break
-                elif inp == "n":
+                elif inp == "" or inp == "n":
                     simulator = False
                     break
                 else:
@@ -227,6 +227,69 @@ class QuizCli:
         except Exception as ex:
             print(f"❌ Sorry, somthing went wrong\n:C\n{ex}")
 
+    def studyTheory(self):
+        dataManager = DataManager()
+        argomenti = dataManager.load("topics")
+        if not argomenti:
+            print("⚠️ Nessun argomento disponibile.")
+            return
+
+        categorie = sorted(set(a['categoria'] for a in argomenti))
+        print("\nCategorie disponibili:")
+        for i, c in enumerate(categorie, start=1):
+            print(f"{i}. {c}")
+        try:
+            scelta = int(input("Scegli la categoria: ")) - 1
+            if scelta < 0 or scelta >= len(categorie):
+                print("❌ Scelta non valida.")
+                return
+            cat_sel = categorie[scelta]
+        except ValueError:
+            print("❌ Inserisci un numero valido.")
+            return
+
+        arg_cat = [a for a in argomenti if a['categoria'] == cat_sel]
+        if not arg_cat:
+            print("⚠️ Nessun argomento per questa categoria.")
+            return
+
+        idx = 0
+        while True:
+            a = arg_cat[idx]
+            print(f"\n[{idx+1}/{len(arg_cat)}] {a['titolo']}\n{a['contenuto']}")
+            cmd = input("\nComandi: [N]ext, [P]revious, [E]xit: ").strip().lower()
+            if cmd == 'n':
+                idx = (idx + 1) % len(arg_cat)
+            elif cmd == 'p':
+                idx = (idx - 1) % len(arg_cat)
+            elif cmd == 'e':
+                break
+            else:
+                print("Comando non riconosciuto.")
+                return
+
+    def showStats(slef):
+        dataManager = DataManager()
+
+        stats = dataManager.loadJsonOutput("stats")
+
+        if not stats or stats == {}:
+            print("⚠️ Nessun progresso registrato.")
+            return
+
+        print("\n📈 Statistiche di studio:")
+        print(f"Totale quiz completati: {stats.get('quiz_totali', 0)}")
+        print(f"Domande corrette:       {stats.get('domande_corrette', 0)}")
+        print(f"Domande sbagliate:      {stats.get('domande_sbagliate', 0)}")
+        print(f"Domande saltate:        {stats.get('domande_skippate', 0)}")
+
+        per_categoria = stats.get("per_categoria", {})
+        if per_categoria:
+            print("\n📊 Statistiche per categoria:")
+            for cat, s in per_categoria.items():
+                print(f"- {cat}: {s['corrette']} corrette, {s['sbagliate']} sbagliate")
+
+        
 
     def menu(self):
         while True:
@@ -248,11 +311,9 @@ class QuizCli:
             elif choice == "4":
                 self.quizByCategory()
             elif choice == "5":
-                print("Work In Progress")
-                # study_theory()
+                self.studyTheory()
             elif choice == "6":
-                print("Work In Progress")
-                # show_study_stats()
+                self.showStats()
             elif choice == "7":
                 break
             else:

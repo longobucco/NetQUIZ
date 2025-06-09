@@ -199,7 +199,7 @@ class Quiz(object):
         
         dataManager.saveTxt("results", result)
         dataManager.saveJson("progress", progress_entry)
-        dataManager.saveJson("stats", stats)
+        dataManager.overwriteOutput("stats", stats)
         
     def getMaxScore(self):
         return len(self.questions) * Question.CORRECT_SCORE
