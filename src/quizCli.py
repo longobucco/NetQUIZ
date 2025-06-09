@@ -8,18 +8,35 @@ class QuizCli:
     def runQuiz(self):
         quiz = Quiz()
 
-        requested = int(input(f"How many questions do you want (1 - 33)? "))
+        requested = 0
+        simulator = True
+
+        while True:
+            try:
+                requested = int(input(f"How many questions do you want (1 - 33)? "))
+                break
+            except:
+                print("❌ Insert a integer value.")
 
         if not quiz.prepare(requested):
             print("⚠️ No questions available.")
-            return [], [], []
+            # return [], [], []
         
+        while True:
+            inp = input("Exame mode? (if yes you wont be able to see the incorrect answers untill the end)\n[Y]/N: ").strip().lower()
+            if inp == "" or inp == "y":
+                simulator = True
+                break
+            elif inp == "n":
+                simulator = False
+                break
+            else:
+                print("❌ Please only type Y or N")
+
         quiz.start()
 
         # stats
         score = 0.0
-        wrong = []
-        skipped = []
 
         while True:
             category, question, answers, selected = quiz.getCurrent()
@@ -39,22 +56,42 @@ class QuizCli:
                     quiz.precedent()
                     continue
                 elif inp == "f":
-                    wrong, skipped, score = quiz.stop()
+                    score = quiz.stop()
                     break
                 else:
                     try:
                         ans = int(inp) - 1
                         if quiz.answerCurrent(ans):
-                            quiz.next()
-                            print("Question answered!")
+                           
+                            if simulator:
+                                print("Question answered!")
+                                
+                            else:
+                                correct = quiz.getCurrentCorrect()
+                                if correct == ans:
+                                    print("✅ Correct!")
+                                      
+                                else:
+                                    print(f"❌ Wrong, correct answer: {answers[correct]}") 
+                                    input("Press any key to continue...")   
 
+                            quiz.next() 
                         else:
                             print("❌ Invalid answer index.")
 
                     except:
                         print("❌ Invalid input.")
             else:
-                print(f"✅ Already answered: {answers[selected]}.")
+                if simulator:
+                    print(f"✅ Already answered: {answers[selected]}.")
+                else:
+                    correct = quiz.getCurrentCorrect()
+                    if  correct == selected:
+                        print(f"✅ Already answered: {answers[selected]}.")
+                    else:
+                        print(f"❌ Already answered: {answers[selected]}.\n correct answer: {answers[correct]}")
+
+                    
                 inp = input(
                     "Command: [N]ext / [P]rev / [C]hange / [F]inish: ").strip().lower()
                 if inp == "n":
@@ -62,10 +99,15 @@ class QuizCli:
                 elif inp == "p":
                     quiz.precedent()
                 elif inp == "c":
+                    if not simulator:
+                        print("You can change it only in simulator mode")
+                        continue
                     quiz.answerCurrent(-1)
                 elif inp == "f":
-                    wrong, skipped, score = quiz.stop()
+                    score = quiz.stop()
                     break    
+                else:
+                    print("❌ Invalid input.")
 
         print(f"\n🎯 Final Score: {score:.2f}/{quiz.getMaxScore()}")
 
@@ -75,7 +117,11 @@ class QuizCli:
             if inp == "n":
                 break
             elif inp == "" or inp =="y":
-                # save
+                try:
+                    quiz.save()
+                    print("✅ Data saved!")
+                except Exception as ex:
+                    print(f"❌ Sorry, somthing went wrong data has been lost\n:C\n{ex}")
                 break
             else:
                 print("❌ Please only type Y or N")

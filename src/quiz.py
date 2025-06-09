@@ -14,10 +14,14 @@ class Quiz(object):
     def  __init__(self):
         self.questions = []
         self.startTime = -1
+        self.endTime = -1
         self.lenght = 0
         self.score = 0
         self.timeStamp = -1
         self.currentQuestion = -1
+
+        self.wrong = []
+        self.skipped = []
 
     def prepare(self, _number ,_category = "none"):
         dataManager = DataManager()
@@ -75,8 +79,8 @@ class Quiz(object):
 
         # Is not a loaded Quiz
         # or an empty one
-        if self.timeStamp == -1 and len(self.questions) > 0: 
-            self.timeStamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        if self.startTime == -1 and len(self.questions) > 0: 
+
             self.startTime = time.time()
             self.currentQuestion = 0
     
@@ -107,26 +111,62 @@ class Quiz(object):
             i = self.currentQuestion
             return self.questions[i].category, self.questions[i].question, self.questions[i].answers, self.questions[i].selected
 
+    def getCurrentCorrect(self):
+
+        return self.questions[self.currentQuestion].correct
+
     def stop(self):
-        wrong = []
-        skipped = []
+
+        self.endTime = time.time()
+        self.timeStamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
         for question in self.questions:
 
             _valuation, _score = question.evaluate()
 
             if _valuation == util.INCORRECT_ANSWER:
-                wrong.append(question.id)
+                self.wrong.append(question.id)
             elif _valuation == util.UNASWERED_ANSWER:
-                skipped.append(question.id)
+                self.skipped.append(question.id)
             
             self.score += _score
         
-        return wrong, skipped, self.score
+        return self.score
     
     def save(self):
-        pass
-    
+
+        if self.endTime <= self.startTime:
+            raise Exception("Trying to save an quiz that is not ended")
+
+        result = {
+            "timestamp": self.timeStamp,
+            "punteggio": f"{self.score:.2f}/{self.getMaxScore()}",
+            "sbagliate": self.wrong,
+            "skippate": self.skipped
+        }
+
+        duration = int(self.endTime - self.startTime)
+        total = len(self.questions)
+        correct = total - len(self.wrong) - len(self.skipped)
+        accuracy = (correct / total) * 100 if total else 0
+        categories = sorted(set(q.category for q in self.questions))
+
+        progress_entry = {
+            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "total_questions": total,
+            "score": round(self.score, 2),
+            "correct": correct,
+            "wrong": len(self.wrong),
+            "skipped": len(self.skipped),
+            "accuracy_percent": round(accuracy, 2),
+            "duration_sec": duration,
+            "categories": categories
+        }
+
+        dataManager = DataManager()
+        dataManager.saveTxt("results", result)
+        dataManager.saveJson("progress", progress_entry)
+        
         
     def getMaxScore(self):
         return len(self.questions) * Question.CORRECT_SCORE
