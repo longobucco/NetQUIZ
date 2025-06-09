@@ -2,11 +2,11 @@ import random
 import time
 from datetime import datetime
 from src.quizClass.dataManager import DataManager
-from quizClass.question import Question
+from src.quizClass.question import Question
 
-import quizClass.utility as util
+import src.quizClass.utility as util
 
-class quiz(object):
+class Quiz(object):
     def __init__(self, _jsonQuiz):
         # future use, implement the possibility to print the question
         pass
@@ -20,15 +20,16 @@ class quiz(object):
         self.currentQuestion = -1
 
     def prepare(self, _number ,_category = "none"):
+        dataManager = DataManager()
 
+        _jsonQuiz = dataManager.load("quiz")
+        if not _jsonQuiz:
+            return False
+        
         if _number <= 0: # if invalid clip it to 1
             _number = 1
 
-        _number = min(_number, util.MAX_QUIZ_LENGHT)
-
-        dataManager = DataManager()
-
-        _jsonQuiz = dataManager.load()
+        _number = min(_number, util.MAX_QUIZ_LENGHT, len(_jsonQuiz))
 
         if _category == "none": # normal load
 
@@ -68,11 +69,13 @@ class quiz(object):
                         randJsonQ["corretta"],
                         randJsonQ["categoria"]
                     ))
+        return True
     
     def start(self):
 
-        # Is not a loaded quiz or an empty one
-        if self.timeStamp == -1 and self.questions.lenght > 0: 
+        # Is not a loaded Quiz
+        # or an empty one
+        if self.timeStamp == -1 and len(self.questions) > 0: 
             self.timeStamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             self.startTime = time.time()
             self.currentQuestion = 0
@@ -81,7 +84,7 @@ class quiz(object):
         
         if self.currentQuestion >= 0:
             self.currentQuestion += 1
-            if self.currentQuestion == self.questions.lenght:
+            if self.currentQuestion == len(self.questions):
                 self.currentQuestion = 0
 
         return self.currentQuestion
@@ -91,13 +94,19 @@ class quiz(object):
         if self.currentQuestion >= 0:
             self.currentQuestion -= 1
             if self.currentQuestion == -1:
-                self.currentQuestion = self.questions.lenght - 1
+                self.currentQuestion = len(self.questions) - 1
                 
         return self.currentQuestion
     
     def answerCurrent(self, _answerValue):
-        self.questions[self.currentQuestion].answer(_answerValue)
-    
+        return self.questions[self.currentQuestion].answer(_answerValue)
+
+    def getCurrent(self):
+
+        if self.currentQuestion >= 0:
+            i = self.currentQuestion
+            return self.questions[i].category, self.questions[i].question, self.questions[i].answers, self.questions[i].selected
+
     def stop(self):
         wrong = []
         skipped = []
@@ -111,8 +120,16 @@ class quiz(object):
             elif _valuation == util.UNASWERED_ANSWER:
                 skipped.append(question.id)
             
-            self.score + _score
+            self.score += _score
         
+        return wrong, skipped, self.score
+    
+    def save(self):
+        pass
+    
+        
+    def getMaxScore(self):
+        return len(self.questions) * Question.CORRECT_SCORE
         #implement save
 
             

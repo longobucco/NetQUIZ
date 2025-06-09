@@ -26,7 +26,7 @@ class DataManager(object):
             raise Exception("Requested to load a file that do not exists")
         if not os.path.exists(self.INPUT_FILES.get(resurce)):
             return []
-        with open(self.inputFiles.get(resurce), 'r', encoding='utf-8') as f:
+        with open(self.INPUT_FILES.get(resurce), 'r', encoding='utf-8') as f:
             return json.load(f)
 
     #def save(self, resource):

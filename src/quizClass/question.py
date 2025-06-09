@@ -1,4 +1,4 @@
-import utility as util
+import src.quizClass.utility as util
 
 class Question(object):
 
@@ -16,7 +16,8 @@ class Question(object):
         self.selected = -1
     
     def answer(self, _answerId):
-        if _answerId >= self.answers.lenght:
+
+        if _answerId >= len(self.answers):
 
             return False # Invalid answer
         

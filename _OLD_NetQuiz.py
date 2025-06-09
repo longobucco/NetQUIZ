@@ -4,7 +4,7 @@ import time
 import random
 from collections import Counter, defaultdict
 from datetime import datetime
-import src.utility as util
+import src.quizClass.utility as util
 
 for filename in [util.STATS_FILE, util.PROGRESS_FILE]:
     if not os.path.exists(filename):
