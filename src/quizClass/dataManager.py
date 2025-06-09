@@ -41,6 +41,17 @@ class DataManager(object):
             return []
         return lines
 
+    def loadJsonOutput(self, _resource):
+        if _resource not in self.OUTPUT_FILES.keys():
+            raise Exception("Requested to load a file that do not exists")
+        if not os.path.exists(self.OUTPUT_FILES.get(_resource)):
+            return {}
+        with open(self.OUTPUT_FILES.get(_resource), 'r', encoding='utf-8') as f:
+            try:
+                return json.load(f)
+            except json.JSONDecodeError:
+                return {}
+
     def saveJson(self, _resource, _content):
         if _resource not in self.OUTPUT_FILES.keys():
             raise Exception("Requested to load a file that do not exists")
@@ -70,6 +81,12 @@ class DataManager(object):
         if _resource not in self.INPUT_FILES.keys():
             raise Exception("Requested to load a file that do not exists")
         with open(self.INPUT_FILES.get(_resource), 'w', encoding='utf-8') as f:
+            json.dump(_content, f, indent=4, ensure_ascii=False)
+
+    def overwriteOutput(self, _resource, _content):
+        if _resource not in self.OUTPUT_FILES.keys():
+            raise Exception("Requested to load a file that do not exists")
+        with open(self.OUTPUT_FILES.get(_resource), 'w', encoding='utf-8') as f:
             json.dump(_content, f, indent=4, ensure_ascii=False)
 
     # Load topics from file

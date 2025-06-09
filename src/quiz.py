@@ -150,12 +150,17 @@ class Quiz(object):
         if self.endTime <= self.startTime:
             raise Exception("Trying to save an quiz that is not ended")
 
+        dataManager = DataManager()
+
+        # results for recovery quiz
         result = {
             "timestamp": self.timeStamp,
             "punteggio": f"{self.score:.2f}/{self.getMaxScore()}",
             "sbagliate": self.wrong,
             "skippate": self.skipped
         }
+
+        # progress
 
         duration = int(self.endTime - self.startTime)
         total = len(self.questions)
@@ -175,10 +180,26 @@ class Quiz(object):
             "categories": categories
         }
 
-        dataManager = DataManager()
+        # stats
+
+        stats = dataManager.loadJsonOutput("stats")
+         # Inizializza se mancano
+        stats.setdefault("quiz_totali", 0)
+        stats.setdefault("domande_corrette", 0)
+        stats.setdefault("domande_sbagliate", 0)
+        stats.setdefault("domande_skippate", 0)
+        stats.setdefault("per_categoria", {})
+
+        stats["quiz_totali"] += 1
+        stats["domande_corrette"] += correct
+        stats["domande_sbagliate"] += len(self.wrong)
+        stats["domande_skippate"] += len(self.skipped)
+
+        # save everithing
+        
         dataManager.saveTxt("results", result)
         dataManager.saveJson("progress", progress_entry)
-        
+        dataManager.saveJson("stats", stats)
         
     def getMaxScore(self):
         return len(self.questions) * Question.CORRECT_SCORE
