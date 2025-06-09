@@ -7,13 +7,14 @@ from datetime import datetime
 
 
 # File paths
-QUIZ_FILE = 'quiz.json'
-RESULTS_FILE = 'results.txt'
-ARGOMENTI_FILE = 'topics.json'
-PROGRESS_FILE = 'progress.json'
-STATS_FILE = "stats.json"
+QUIZ_FILE = 'data/source/quiz.json'
+ARGOMENTI_FILE = 'data/source/topics.json'
+RESULTS_FILE = 'data/saves/results.txt'
 
-for filename in ["stats.json", "progress.json"]:
+PROGRESS_FILE = 'data/saves/progress.json'
+STATS_FILE = "data/saves/stats.json"
+
+for filename in [STATS_FILE, PROGRESS_FILE]:
     if not os.path.exists(filename):
         with open(filename, "w") as f:
             json.dump({}, f)
