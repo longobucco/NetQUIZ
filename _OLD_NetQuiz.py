@@ -4,17 +4,9 @@ import time
 import random
 from collections import Counter, defaultdict
 from datetime import datetime
+import src.utility as util
 
-
-# File paths
-QUIZ_FILE = 'data/source/quiz.json'
-ARGOMENTI_FILE = 'data/source/topics.json'
-RESULTS_FILE = 'data/saves/results.txt'
-
-PROGRESS_FILE = 'data/saves/progress.json'
-STATS_FILE = "data/saves/stats.json"
-
-for filename in [STATS_FILE, PROGRESS_FILE]:
+for filename in [util.STATS_FILE, util.PROGRESS_FILE]:
     if not os.path.exists(filename):
         with open(filename, "w") as f:
             json.dump({}, f)
@@ -22,9 +14,9 @@ for filename in [STATS_FILE, PROGRESS_FILE]:
 
 # Load topics from file
 def load_topics():
-    if not os.path.exists(ARGOMENTI_FILE):
+    if not os.path.exists(util.ARGOMENTI_FILE):
         return []
-    with open(ARGOMENTI_FILE, 'r', encoding='utf-8') as f:
+    with open(util.ARGOMENTI_FILE, 'r', encoding='utf-8') as f:
         return json.load(f)
 
 
@@ -71,15 +63,15 @@ def study_theory():
 
 # Load quiz data
 def load_quiz():
-    if not os.path.exists(QUIZ_FILE):
+    if not os.path.exists(util.QUIZ_FILE):
         return []
-    with open(QUIZ_FILE, 'r', encoding='utf-8') as f:
+    with open(util.QUIZ_FILE, 'r', encoding='utf-8') as f:
         return json.load(f)
 
 
 # Save quiz data
 def save_quiz(quiz):
-    with open(QUIZ_FILE, 'w', encoding='utf-8') as f:
+    with open(util.QUIZ_FILE, 'w', encoding='utf-8') as f:
         json.dump(quiz, f, indent=4, ensure_ascii=False)
 
 
@@ -102,8 +94,8 @@ def save_progress(start_time, quiz, score, wrong, skipped):
         "categories": categories
     }
 
-    if os.path.exists(PROGRESS_FILE):
-        with open(PROGRESS_FILE, 'r', encoding='utf-8') as f:
+    if os.path.exists(util.PROGRESS_FILE):
+        with open(util.PROGRESS_FILE, 'r', encoding='utf-8') as f:
             try:
                 data = json.load(f)
                 if not isinstance(data, list):  # Ensure data is a list, added becouse if json file is empty "{}" it will generate a dictionary
@@ -115,16 +107,16 @@ def save_progress(start_time, quiz, score, wrong, skipped):
 
     data.append(progress_entry)
 
-    with open(PROGRESS_FILE, 'w', encoding='utf-8') as f:
+    with open(util.PROGRESS_FILE, 'w', encoding='utf-8') as f:
         json.dump(data, f, indent=4, ensure_ascii=False)
 
 
 def show_study_stats():
-    if not os.path.exists(STATS_FILE) or os.path.getsize(STATS_FILE) == 0:
+    if not os.path.exists(util.STATS_FILE) or os.path.getsize(util.STATS_FILE) == 0:
         print("⚠️ Nessun progresso registrato.")
         return
 
-    with open(STATS_FILE, "r", encoding="utf-8") as f:
+    with open(util.STATS_FILE, "r", encoding="utf-8") as f:
         try:
             stats = json.load(f)
         except json.JSONDecodeError:
@@ -178,9 +170,9 @@ def add_question():
 
 # Extract last incorrect and skipped question IDs
 def get_last_wrong_ids():
-    if not os.path.exists(RESULTS_FILE):
+    if not os.path.exists(util.RESULTS_FILE):
         return []
-    with open(RESULTS_FILE, 'r', encoding='utf-8') as f:
+    with open(util.RESULTS_FILE, 'r', encoding='utf-8') as f:
         lines = [line.strip() for line in f if line.strip()]
     if not lines:
         return []
@@ -203,7 +195,7 @@ def save_results(score, total, wrong, skipped):
         "sbagliate": wrong,
         "skippate": skipped
     }
-    with open(RESULTS_FILE, 'a', encoding='utf-8') as f:
+    with open(util.RESULTS_FILE, 'a', encoding='utf-8') as f:
         f.write(json.dumps(result, ensure_ascii=False) + "\n")
 
 
@@ -226,8 +218,8 @@ def update_study_stats(quiz, wrong, skipped):
     correct = total - len(wrong) - len(skipped)
 
     # Carica stats cumulative
-    if os.path.exists(STATS_FILE):
-        with open(STATS_FILE, "r", encoding="utf-8") as f:
+    if os.path.exists(util.STATS_FILE):
+        with open(util.STATS_FILE, "r", encoding="utf-8") as f:
             try:
                 stats = json.load(f)
             except json.JSONDecodeError:
@@ -259,7 +251,7 @@ def update_study_stats(quiz, wrong, skipped):
             stats["per_categoria"][cat]["corrette"] += 1
 
     # Salva
-    with open(STATS_FILE, "w", encoding="utf-8") as f:
+    with open(util.STATS_FILE, "w", encoding="utf-8") as f:
         json.dump(stats, f, indent=4, ensure_ascii=False)
 
 
@@ -445,41 +437,41 @@ def menu():
 
 # Ensure the quiz file exists
 def ensure_quiz_file():
-    if not os.path.exists(QUIZ_FILE):
-        with open(QUIZ_FILE, 'w', encoding='utf-8') as f:
+    if not os.path.exists(util.QUIZ_FILE):
+        with open(util.QUIZ_FILE, 'w', encoding='utf-8') as f:
             json.dump([], f, indent=4, ensure_ascii=False)
     ensure_quiz_file()
     # Ensure the results file exists
 
 
 def ensure_results_file():
-    if not os.path.exists(RESULTS_FILE):
-        with open(RESULTS_FILE, 'w', encoding='utf-8') as f:
+    if not os.path.exists(util.RESULTS_FILE):
+        with open(util.RESULTS_FILE, 'w', encoding='utf-8') as f:
             pass
     ensure_results_file()
 # Ensure the arguments file exists
 
 
 def ensure_argomenti_file():
-    if not os.path.exists(ARGOMENTI_FILE):
-        with open(ARGOMENTI_FILE, 'w', encoding='utf-8') as f:
+    if not os.path.exists(util.ARGOMENTI_FILE):
+        with open(util.ARGOMENTI_FILE, 'w', encoding='utf-8') as f:
             json.dump([], f, indent=4, ensure_ascii=False)
     ensure_argomenti_file()
     # Ensure the arguments file exists
 
 
 def ensure_argomenti_file():
-    if not os.path.exists(ARGOMENTI_FILE):
-        with open(ARGOMENTI_FILE, 'w', encoding='utf-8') as f:
+    if not os.path.exists(util.ARGOMENTI_FILE):
+        with open(util.ARGOMENTI_FILE, 'w', encoding='utf-8') as f:
             json.dump([], f, indent=4, ensure_ascii=False)
     ensure_argomenti_file()
 
 
 # Run the menu
 if __name__ == "__main__":
-    if not os.path.exists(QUIZ_FILE):
+    if not os.path.exists(util.QUIZ_FILE):
         save_quiz([])
-    if not os.path.exists(RESULTS_FILE):
-        with open(RESULTS_FILE, 'w', encoding='utf-8') as f:
+    if not os.path.exists(util.RESULTS_FILE):
+        with open(util.RESULTS_FILE, 'w', encoding='utf-8') as f:
             pass
     menu()
